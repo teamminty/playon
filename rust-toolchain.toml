@@ -1,0 +1,3 @@
+[toolchain]
+channel = "nightly"
+targets = ["armebv7r-none-eabi"]
