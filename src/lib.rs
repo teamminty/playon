@@ -1,11 +1,16 @@
 #![no_std]
 
+extern crate alloc;
+
 use playdate_sys::ffi::PlaydateAPI;
 
 pub mod prelude;
 mod input;
 mod rt;
-mod event;
+pub(crate) mod event;
+pub(crate) mod mutex;
+pub mod ty;
+pub mod std;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Playdate {

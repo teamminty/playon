@@ -1,6 +1,8 @@
 use core::{ffi::{c_int, c_void}, sync::atomic::{AtomicBool, Ordering}};
 use playdate_sys::ffi::{PDSystemEvent, PlaydateAPI};
 
+use crate::ty::Key;
+
 extern "Rust" {
     fn __playon_start();
     fn __playon_update() -> i32;
@@ -35,8 +37,16 @@ pub extern "C" fn eventHandlerShim(api: *const PlaydateAPI, event: PDSystemEvent
 		PDSystemEvent::kEventTerminate => {/* TODO */},
 		PDSystemEvent::kEventInitLua => {/* TODO */},
 		// simulator only, keyboard events:
-		PDSystemEvent::kEventKeyPressed => {/* TODO */},
-		PDSystemEvent::kEventKeyReleased => {/* TODO */},
+		PDSystemEvent::kEventKeyPressed => {
+            for v in &crate::event::EVENTS.get().keypress {
+                v(Key)
+            }
+        },
+		PDSystemEvent::kEventKeyReleased => {
+            for v in &crate::event::EVENTS.get().keyrelease {
+                v(Key)
+            }
+        },
 	}
     0
 }
