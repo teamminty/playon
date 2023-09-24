@@ -11,6 +11,7 @@ pub(crate) mod event;
 pub(crate) mod mutex;
 pub mod ty;
 pub mod std;
+pub mod macros;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Playdate {

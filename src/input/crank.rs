@@ -22,7 +22,7 @@ impl Crank {
     pub fn set_sounds_disabled(&self, v: bool) -> bool {
         unsafe {(*api().system).setCrankSoundsDisabled.unwrap()(v as i32) != 0}
     }
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             _private: core::marker::PhantomData
         }
