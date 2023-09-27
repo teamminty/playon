@@ -1,0 +1,30 @@
+[package]
+name = "hello_world"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "ISC"
+
+[lib]
+name = "example"
+path = "src/lib.rs"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+playon = { path = "../../" }
+euclid = { version = "0.22.9", default-features = false, features = [ "libm" ] }
+
+[package.metadata.cargo-xbuild]
+memcpy = false
+sysroot_path = "target/sysroot"
+panic_immediate_abort = false
+
+[profile.dev]
+panic = "abort"
+opt-level = 'z'
+lto = true
+
+[profile.release]
+panic = "abort"
+opt-level = 'z'
+lto = true

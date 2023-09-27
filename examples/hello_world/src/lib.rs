@@ -1,5 +1,5 @@
 #![no_std]
-#![no_main]
+// #![no_main]
 use playon::prelude::*;
 
 #[pdmain]

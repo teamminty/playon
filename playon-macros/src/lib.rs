@@ -12,8 +12,6 @@ use syn::{parse_macro_input, ItemFn, parse_quote, Visibility, spanned::Spanned, 
 #[proc_macro_attribute]
 pub fn pdmain(attr: TokenStream, input: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(input as ItemFn);
-    input.attrs.push(parse_quote! {#[no_mangle]});
-    input.vis = Visibility::Public(parse_quote! {pub});
     match &input.sig.abi {
         Some(a) => {
             return quote_spanned! {a.span() => {
@@ -40,7 +38,14 @@ pub fn pdmain(attr: TokenStream, input: TokenStream) -> TokenStream {
                         Type::Path(pat) => {
                             match &pat.path.segments.last() {
                                 Some(x) if &x.ident.to_string() == "Playdate" => {
+                                    let name = &input.sig.ident;
                                     quote! {
+                                        #[no_mangle]
+                                        #[doc(hidden)]
+                                        pub fn __playon_start() -> i32 {
+                                            #name(::playon::Playdate::current());
+                                            0
+                                        }
                                         #input
                                     }.into()
                                 }

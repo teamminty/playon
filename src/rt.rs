@@ -6,7 +6,6 @@ use crate::ty::Key;
 extern "Rust" {
     fn __playon_start();
     fn __playon_update() -> i32;
-    fn __playon_postevent() -> i32;
 }
 
 static STARTED: AtomicBool = AtomicBool::new(false);
@@ -15,13 +14,8 @@ unsafe extern "C" fn on_update(_: *mut c_void) -> i32 {
     if STARTED.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
         __playon_start();
     }
-    match __playon_update() {
-        // 1 means success
-        1 => {}
-        o => return o
-    };
     update_events();
-    __playon_postevent()
+    __playon_update()
 }
 
 #[no_mangle]

@@ -18,10 +18,10 @@ impl DPad {
             )
         };
         DPadState {
-            up: get_bit_at(down.0, 0),
-            down: get_bit_at(down.0, 1),
-            left: get_bit_at(down.0, 2),
-            right: get_bit_at(down.0, 3),
+            up: get_bit_at(down.0.into(), 0),
+            down: get_bit_at(down.0.into(), 1),
+            left: get_bit_at(down.0.into(), 2),
+            right: get_bit_at(down.0.into(), 3),
         }
     }
     pub(crate) const fn new() -> Self {

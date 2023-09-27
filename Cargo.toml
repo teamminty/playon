@@ -13,4 +13,7 @@ playdate-sys = { version = "0.1.10", features = ["bindings-derive-copy", "bindin
 playon-macros = { version = "0.0.*", path = "./playon-macros" }
 
 [workspace]
-members = ["playon-macros"]
+members = [
+    "playon-macros",
+    "examples/*"
+]
