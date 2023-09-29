@@ -1,6 +1,6 @@
 use playdate_sys::ffi::PDButtons;
 
-use crate::{api, ty::DPadState};
+use crate::{api, ty::DPadState, get_bit_at};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DPad {
@@ -28,13 +28,5 @@ impl DPad {
         Self {
             _private: core::marker::PhantomData,
         }
-    }
-}
-
-fn get_bit_at(input: u32, n: u8) -> bool {
-    if n < 32 {
-        input & (1 << n) != 0
-    } else {
-        false
     }
 }

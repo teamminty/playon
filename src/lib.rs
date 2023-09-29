@@ -14,7 +14,9 @@ pub(crate) mod mutex;
 pub mod ty;
 pub mod std;
 pub mod macros;
+pub mod consts;
 pub use euclid as math;
+pub mod engine;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Playdate {
@@ -62,5 +64,13 @@ pub mod __private {
             T.get().0 = true;
         }
         Duration::from_millis(unsafe { (*api().system).getCurrentTimeMilliseconds.unwrap()().into() }) - Duration::from_millis(T.get().1)
+    }
+}
+
+pub(crate) fn get_bit_at(input: u32, n: u8) -> bool {
+    if n < 32 {
+        input & (1 << n) != 0
+    } else {
+        false
     }
 }
