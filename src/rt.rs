@@ -18,8 +18,10 @@ unsafe extern "C" fn on_update(_: *mut c_void) -> i32 {
     __playon_update()
 }
 
+playdate_sys::ll_symbols! {}
+
 #[no_mangle]
-pub extern "C" fn eventHandlerShim(api: *const PlaydateAPI, event: PDSystemEvent, _arg: u32) -> c_int {
+pub extern "C" fn eventHandler(api: *const PlaydateAPI, event: PDSystemEvent, _arg: u32) -> c_int {
     match event {
 		PDSystemEvent::kEventInit => unsafe {
 			// register the API entry point

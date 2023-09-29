@@ -1,13 +1,18 @@
 #![no_std]
-// #![no_main]
+use core::time::Duration;
+
 use playon::prelude::*;
 
-#[pdmain]
-fn main(pd: Playdate) {
+pub struct App {
 
 }
 
-#[pdupdate]
-fn update(pd: Playdate) {
-    
+#[pd]
+impl Game for App {
+    fn new() -> Self {
+        Self {  }
+    }
+    fn update(&mut self, pd: Playdate, dt: Duration) {
+        println!("{}", pd.crank().rotation().to_degrees())
+    }
 }

@@ -1,144 +1,47 @@
 use proc_macro::TokenStream;
 use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, ItemFn, parse_quote, Visibility, spanned::Spanned, Type};
+use syn::{parse_macro_input, parse_quote, spanned::Spanned, ItemFn, Type, Visibility, ItemImpl};
 
 /// Valid forms:
 /// ```rust,ignore
-/// #[pdmain]
+/// #[pd]
 /// fn main(pd: Playdate) {
 ///     
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn pdmain(attr: TokenStream, input: TokenStream) -> TokenStream {
-    let mut input = parse_macro_input!(input as ItemFn);
-    match &input.sig.abi {
-        Some(a) => {
-            return quote_spanned! {a.span() => {
-                ::core::compile_error!{"Expected a function with signature fn(Playdate)"}
-                #input
-            }}.into()
+pub fn pd(attr: TokenStream, input: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(input as ItemImpl);
+    match &mut input.trait_ {
+        Some(t) => {
+            t.0 = None;
+            t.1 = parse_quote! { ::playon::Game };
         }
         None => {
-            if &input.sig.inputs.len() != &1 {
-                return quote_spanned! {input.sig.inputs.span() => {
-                    compile_error!("Expected a function with signature fn(Playdate)")
-                    #input
-                }}.into()
-            }
-            match &input.sig.inputs[0] {
-                syn::FnArg::Receiver(v) => {
-                    return quote_spanned! {v.span() => {
-                        compile_error!("Expected a function with signature fn(Playdate)")
-                        #input
-                    }}.into()
-                },
-                syn::FnArg::Typed(v) => {
-                    match &*v.ty {
-                        Type::Path(pat) => {
-                            match &pat.path.segments.last() {
-                                Some(x) if &x.ident.to_string() == "Playdate" => {
-                                    let name = &input.sig.ident;
-                                    quote! {
-                                        #[no_mangle]
-                                        #[doc(hidden)]
-                                        pub fn __playon_start() -> i32 {
-                                            #name(::playon::Playdate::current());
-                                            0
-                                        }
-                                        #input
-                                    }.into()
-                                }
-                                Some(x) => {
-                                    return quote_spanned! {x.span() => {
-                                        compile_error!("Expected a function with signature fn(Playdate)")
-                                        #input
-                                    }}.into()
-                                }
-                                None => {
-                                    return quote_spanned! {pat.path.segments.span() => {
-                                        #input
-                                        compile_error!("Expected a function with signature fn(Playdate)")
-                                    }}.into()
-                                }
-                            }
-                        }
-                        o => {
-                            return quote_spanned! {o.span() => {
-                                compile_error!("Expected a function with signature fn(Playdate)")
-                            }}.into()
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/// Valid forms:
-/// ```rust,ignore
-/// #[pdupdate]
-/// fn update(pd: Playdate) {
-///     
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn pdupdate(attr: TokenStream, input: TokenStream) -> TokenStream {
-    let mut input = parse_macro_input!(input as ItemFn);
-    input.attrs.push(parse_quote! {#[no_mangle]});
-    input.vis = Visibility::Public(parse_quote! {pub});
-    match &input.sig.abi {
-        Some(a) => {
-            return quote_spanned! {a.span() => {
-                ::core::compile_error!{"Expected a function with signature fn(Playdate)"}
+            return quote_spanned! {input.self_ty.span() => {
+                ::core::compile_error!{"Expected `impl Game for "}
                 #input
-            }}.into()
-        }
-        None => {
-            if &input.sig.inputs.len() != &1 {
-                return quote_spanned! {input.sig.inputs.span() => {
-                    compile_error!("Expected a function with signature fn(Playdate)")
-                    #input
-                }}.into()
-            }
-            match &input.sig.inputs[0] {
-                syn::FnArg::Receiver(v) => {
-                    return quote_spanned! {v.span() => {
-                        compile_error!("Expected a function with signature fn(Playdate)")
-                        #input
-                    }}.into()
-                },
-                syn::FnArg::Typed(v) => {
-                    match &*v.ty {
-                        Type::Path(pat) => {
-                            match &pat.path.segments.last() {
-                                Some(x) if &x.ident.to_string() == "Playdate" => {
-                                    quote! {
-                                        #input
-                                    }.into()
-                                }
-                                Some(x) => {
-                                    return quote_spanned! {x.span() => {
-                                        compile_error!("Expected a function with signature fn(Playdate)")
-                                        #input
-                                    }}.into()
-                                }
-                                None => {
-                                    return quote_spanned! {pat.path.segments.span() => {
-                                        #input
-                                        compile_error!("Expected a function with signature fn(Playdate)")
-                                    }}.into()
-                                }
-                            }
-                        }
-                        o => {
-                            return quote_spanned! {o.span() => {
-                                compile_error!("Expected a function with signature fn(Playdate)")
-                            }}.into()
-                        }
-                    }
-                }
-            }
+            }}
+            .into()
         }
     }
+    let s_ty = &input.self_ty;
+    quote! {
+        #[doc(hidden)]
+        static __P: ::playon::__private::Mutex<#s_ty> = ::playon::__private::Mutex::new(unsafe { ::playon::__private::uninit::<#s_ty>() });
+        #[no_mangle]
+        #[doc(hidden)]
+        pub fn __playon_start() {
+            *__P.get() = <#s_ty as ::playon::Game>::new();
+            <#s_ty as ::playon::Game>::start(&mut *__P.get(), ::playon::Playdate::current());
+            let _ = ::playon::__private::dt();
+        }
+        #[no_mangle]
+        #[doc(hidden)]
+        pub fn __playon_update() -> i32 {
+            <#s_ty as ::playon::Game>::update(&mut *__P.get(), ::playon::Playdate::current(), ::playon::__private::dt());
+            0
+        }
+        #input
+    }.into()
 }

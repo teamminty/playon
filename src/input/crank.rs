@@ -1,4 +1,4 @@
-use crate::api;
+use crate::{api, math};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Crank {
@@ -11,7 +11,7 @@ impl Crank {
         unsafe {(*api().system).isCrankDocked.unwrap()() != 0}
     }
     /// Returns the current angle of the crank.
-    pub fn rotation(&self) -> euclid::Angle<f32> {
+    pub fn rotation(&self) -> math::Angle<f32> {
         unsafe {euclid::Angle::degrees((*api().system).getCrankAngle.unwrap()())}
     }
     pub fn sounds_disabled(&self) -> bool {
