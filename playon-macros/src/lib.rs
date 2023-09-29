@@ -31,14 +31,14 @@ pub fn pd(attr: TokenStream, input: TokenStream) -> TokenStream {
         static __P: ::playon::__private::Mutex<#s_ty> = ::playon::__private::Mutex::new(unsafe { ::playon::__private::uninit::<#s_ty>() });
         #[no_mangle]
         #[doc(hidden)]
-        pub fn __playon_start() {
+        fn __playon_start() {
             *__P.get() = <#s_ty as ::playon::Game>::new();
             <#s_ty as ::playon::Game>::start(&mut *__P.get(), ::playon::Playdate::current());
             let _ = ::playon::__private::dt();
         }
         #[no_mangle]
         #[doc(hidden)]
-        pub fn __playon_update() -> i32 {
+        fn __playon_update() -> i32 {
             <#s_ty as ::playon::Game>::update(&mut *__P.get(), ::playon::Playdate::current(), ::playon::__private::dt());
             0
         }
